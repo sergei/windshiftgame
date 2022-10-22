@@ -1,7 +1,7 @@
 {
   "name": "windshiftgame",
   "version": "0.1.0",
-  "homepage": "https://sergei.github.io/windshiftgame",
+  "homepage": "https://windshiftgame.com/",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.4",
