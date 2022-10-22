@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/windshiftgame/static/css/main.073c9b0a.css",
+    "main.js": "/windshiftgame/static/js/main.887cc792.js",
+    "static/js/787.32d947e0.chunk.js": "/windshiftgame/static/js/787.32d947e0.chunk.js",
+    "index.html": "/windshiftgame/index.html",
+    "static/media/J105.txt": "/windshiftgame/static/media/J105.4e79b0172e7dda7581f6.txt",
+    "main.073c9b0a.css.map": "/windshiftgame/static/css/main.073c9b0a.css.map",
+    "main.887cc792.js.map": "/windshiftgame/static/js/main.887cc792.js.map",
+    "787.32d947e0.chunk.js.map": "/windshiftgame/static/js/787.32d947e0.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.073c9b0a.css",
+    "static/js/main.887cc792.js"
+  ]
+}

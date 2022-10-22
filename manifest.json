@@ -1,0 +1,20 @@
+{
+  "short_name": "Wind shift game",
+  "name": "Wind shift game",
+  "icons": [
+    {
+      "src": "icons8-sail-boat-laces-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons8-sail-boat-laces-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
