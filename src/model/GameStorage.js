@@ -1,4 +1,3 @@
-
 class GameStorage {
     boatStats = []
 
@@ -39,4 +38,4 @@ class GameStorage {
     }
 
 }
-module.exports = GameStorage
+export default GameStorage

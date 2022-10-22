@@ -164,4 +164,4 @@ class BoatModel {
     }
 }
 
-module.exports = BoatModel
+export default  BoatModel

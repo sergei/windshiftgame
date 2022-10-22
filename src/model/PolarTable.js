@@ -150,4 +150,4 @@ class PolarTable {
 	}
 }
 
-module.exports = PolarTable
+export default  PolarTable
