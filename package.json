@@ -1,6 +1,7 @@
 {
   "name": "windshiftgame",
   "version": "0.1.0",
+  "homepage": "https://sergei.github.io/windshiftgame",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.4",
@@ -11,6 +12,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/react": "^18.0.21",
+    "gh-pages": "^4.0.0",
     "konva": "^8.3.13",
     "randomcolor": "^0.6.2",
     "react": "^18.2.0",
@@ -20,6 +22,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
