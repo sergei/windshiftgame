@@ -10,7 +10,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from "react";
-import {Button, FormControl, Radio, RadioGroup} from "@mui/material";
+import {Box, Button, FormControl, Link, Paper, Radio, RadioGroup} from "@mui/material";
 import RaceCourse from "./RaceCourse";
 import BoatStats from "./BoatStats";
 import {useEffect} from "react";
@@ -168,13 +168,16 @@ function Game(props) {
 
     const stageRotation = pointOfSail === 'upwind' || pointOfSail === 'reach'
         ?{rotation:0, offsetX:0, offsetY:0}
-        :{rotation:180, offsetX:props.stageWidth/2, offsetY:props.stageHeight}
+        :{rotation:180, offsetX:props.stageWidth, offsetY:props.stageHeight}
 
+    console.log(`w = ${props.stageWidth}`)
     return (
         <div>
             <div>
-                <Grid container spacing={2}>
-                    <Grid xs={10} >
+                <Grid container spacing={2} disableEqualOverflow>
+                    <Grid item xs={1} >
+                    </Grid>
+                    <Grid item style={{ width: props.stageWidth * 1.1 }}  xs={9} >
                         <Stage width={props.stageWidth} height={props.stageHeight}>
                             <Layer rotation={stageRotation.rotation} offsetY={stageRotation.offsetY} offsetX={stageRotation.offsetX}>
                                 <WindField width={props.stageWidth} height={props.stageHeight} nrows={props.wm.nrows}
@@ -186,15 +189,28 @@ function Game(props) {
                             </Layer>
                         </Stage>
                     </Grid>
-                    <Grid xs={2} >
-                        <BoatStats bm={props.bm}/>
-                        <ScoreBoard gameStats={gameStats} onOpponentsSelected={onOpponentsSelected}/>
+                    <Grid item xs={2} >
+                        <Box mt={1}>
+                            <Link href="https://github.com/sergei/windshiftgame/wiki" target="_blank"  rel="noopener">Help</Link>
+                        </Box>
+                        <Box  mt={2}>
+                            <Paper elevation={1} >
+                                <BoatStats bm={props.bm}/>
+                            </Paper>
+                        </Box>
+                        <Box  mt={2}>
+                            <Paper elevation={1} >
+                                <ScoreBoard gameStats={gameStats} onOpponentsSelected={onOpponentsSelected}/>
+                            </Paper>
+                        </Box>
                     </Grid>
                 </Grid>
             </div>
             <div>
                 <FormControl>
                 <Grid container spacing={2}>
+                    <Grid item xs={1} >
+                    </Grid>
                     <Grid xs={3}>
                         <RadioGroup row aria-labelledby="demo-row-radio-buttons-group-label" name="tack-group"
                                     value={tack}
@@ -221,7 +237,7 @@ function Game(props) {
                             <FormControlLabel value="downwind" control={<Radio />} label="Downwind" />
                         </RadioGroup>
                     </Grid>
-                    <Grid xs={3}>
+                    <Grid xs={2}>
                         <FormGroup>
                             <FormControlLabel control={<Checkbox checked={showControls} onChange={handleChangeShowControls}/>} label="Show controls" />
                         </FormGroup>

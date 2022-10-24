@@ -90,12 +90,11 @@ function WindCell(props) {
     return (
         <Group x={props.x} y={props.y}>
 
-            {/*<Circle x={xc} y={yc} stroke="black" radius={props.side/2} />*/}
-            <Rect width={props.side} height={props.side} stroke="black" />
+            <Rect width={props.side} height={props.side} stroke="lightgrey" />
 
-            <Arrow points={windPoints} stroke={'red'} pointerLength={10} pointerWidth={12} />
+            <Arrow points={windPoints} stroke={'lightblue'} pointerLength={10} pointerWidth={12} />
 
-            {/*<Arrow points={currPoints} stroke={'blue'} pointerLength={10} pointerWidth={12} />*/}
+            {/*<Arrow points={currPoints} stroke={'red'} pointerLength={10} pointerWidth={12} />*/}
 
             {windControl}
 

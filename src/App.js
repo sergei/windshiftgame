@@ -9,12 +9,15 @@ import RaceCourseModel from "./model/RaceCourseModel";
 import GameStorage from "./model/GameStorage";
 
 function App() {
-    const stageWidth = window.innerWidth
-    const stageHeight = window.innerHeight* 0.75
+    const maxStageWidth = window.innerWidth
+    const maxStageHeight = window.innerHeight* 0.7
     const stageHeightMiles = 1.
-    const milesInPixel = stageHeightMiles / stageHeight
+    const milesInPixel = stageHeightMiles / maxStageHeight
 
-    const wm = new WindFieldModel(stageHeight * milesInPixel, stageWidth * milesInPixel);
+    const wm = new WindFieldModel(maxStageHeight * milesInPixel, maxStageWidth * milesInPixel);
+
+    const stageWidthPix = wm.ncols * wm.cellSide / milesInPixel
+    const stageHeightPix = wm.nrows * wm.cellSide / milesInPixel
 
     // Set boat initial position in the middle of the bottom row
 
@@ -41,7 +44,7 @@ function App() {
 
     return (
           <div>
-              <Game stageWidth={stageWidth} stageHeight={stageHeight} milesInPixel={milesInPixel} wm={wm} bm={bm} rc={rc} gs={gs}/>
+              <Game stageWidth={stageWidthPix} stageHeight={stageHeightPix} milesInPixel={milesInPixel} wm={wm} bm={bm} rc={rc} gs={gs}/>
           </div>
       );
 }
