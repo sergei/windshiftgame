@@ -26,13 +26,11 @@ function BoatStats(props) {
 
     return (
         <div>
-            {`SPD: ${boatStats.boatSpeedKts.toFixed(1)} kts`}
-            <br/>
+            {`SPD: ${boatStats.boatSpeedKts.toFixed(1)} kts `}
             {`VMG ${boatStats.vmgKts.toFixed(1)} kts `}
             <br/>
-            { `Distance: ${boatStats.distanceMeters.toFixed(0)} meters`}
-            <br/>
-            {`Time: ${toHHMMSS(boatStats.timeMs / 1000)} `}
+            {`${toHHMMSS(boatStats.timeMs / 1000)} ` }
+            { `${boatStats.distanceMeters.toFixed(0)} m`}
         </div>
     )
 }

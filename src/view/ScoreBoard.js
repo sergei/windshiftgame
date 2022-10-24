@@ -44,7 +44,7 @@ function ScoreBoard(props) {
             >
                 <ListItemButton>
                     <BoatIcon  style={{ color: stat.color }} />
-                    <ListItemText id={labelId} primary={toHHMMSS(stat.elapsedTime / 1000)} />
+                    <ListItemText id={labelId} primary={`${toHHMMSS(stat.elapsedTime / 1000)} ${stat.distanceMeters.toFixed(0)} m`} />
                 </ListItemButton>
             </ListItem>
         )

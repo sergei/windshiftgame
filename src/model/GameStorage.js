@@ -9,6 +9,7 @@ class GameStorage {
         this.boatStats.push(
             {
                 elapsedTime: boatModel.elapsedTimeMs,
+                distanceMeters: boatModel.distanceMeters,
                 trail: [...boatModel.trail],  // Copy track
                 color: color
             }
@@ -19,7 +20,8 @@ class GameStorage {
         return this.boatStats.map((stat) => {
             return {
                 elapsedTime: stat.elapsedTime,
-                color: stat.color
+                color: stat.color,
+                distanceMeters: stat.distanceMeters,
             }
         })
     }
