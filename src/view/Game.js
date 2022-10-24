@@ -36,6 +36,8 @@ function Game(props) {
     const handleTackChange = (event) => {
         setTack(event.target.value);
         props.bm.setTack(event.target.value === 'stbd')
+        setAdjustment('target');
+        props.bm.setAdjustmentAngle(0)
     };
 
     const [isSailingUpwind, setIsSailingUpwind] = React.useState('upwind');
@@ -196,20 +198,20 @@ function Game(props) {
                         </RadioGroup>
                     </Grid>
                     <Grid xs={3}>
-                        <RadioGroup aria-labelledby="demo-radio-buttons-group-label" name="dir-group"
-                                    value={isSailingUpwind}
-                                    onChange={handleUpDownChange}>
-                            <FormControlLabel value="upwind" control={<Radio />} label="Upwind" />
-                            <FormControlLabel value="downwind" control={<Radio />} label="Downwind" />
-                        </RadioGroup>
-                    </Grid>
-                    <Grid xs={3}>
                         <RadioGroup aria-labelledby="demo-radio-buttons-group-label" name="adj-group"
                                     value={adjustment}
                                     onChange={handleAdjustment}>
                             <FormControlLabel value="high" control={<Radio />} label={highLabel} />
                             <FormControlLabel value="target" control={<Radio />} label="target" />
                             <FormControlLabel value="low" control={<Radio />} label={lowLabel} />
+                        </RadioGroup>
+                    </Grid>
+                    <Grid xs={3}>
+                        <RadioGroup aria-labelledby="demo-radio-buttons-group-label" name="dir-group"
+                                    value={isSailingUpwind}
+                                    onChange={handleUpDownChange}>
+                            <FormControlLabel value="upwind" control={<Radio />} label="Upwind" />
+                            <FormControlLabel value="downwind" control={<Radio />} label="Downwind" />
                         </RadioGroup>
                     </Grid>
                     <Grid xs={3}>
