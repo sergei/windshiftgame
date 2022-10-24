@@ -44,6 +44,16 @@ function Boat(props) {
         return <Group key={idx}>{boatHull(opponent.x, opponent.y, opponent.hdg, opponent.color)}</Group>
     })
 
+
+    const weatherMarkX = props.rc.wm.x/props.milesInPixel
+    const weatherMarkY = props.rc.wm.y/props.milesInPixel
+
+    // Check if we reached weather mark
+    const distToWeatherMark = Math.sqrt((boatPos.x - weatherMarkX) ** 2 +  (boatPos.y - weatherMarkY) ** 2)
+    if ( distToWeatherMark < props.weatherMarkRadiusPix){
+        props.onWeatherMarkReached()
+    }
+
     return (
         <Group>
             {opponents}

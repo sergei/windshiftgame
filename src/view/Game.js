@@ -38,9 +38,9 @@ function Game(props) {
         props.bm.setTack(event.target.value === 'stbd')
     };
 
-    const [updown, setUpDown] = React.useState('upwind');
+    const [isSailingUpwind, setIsSailingUpwind] = React.useState('upwind');
     const handleUpDownChange = (event) => {
-        setUpDown(event.target.value);
+        setIsSailingUpwind(event.target.value);
         props.bm.setUpDown(event.target.value === 'upwind')
     };
 
@@ -80,9 +80,10 @@ function Game(props) {
         setGameState(GAME_STATE_READY)
         setTack('stbd');
         props.bm.setTack(true)
-        setUpDown('upwind');
+        setIsSailingUpwind('upwind');
         props.bm.setUpDown(true)
         props.bm.stopGame()
+        setMarkWasRounded(false)
     }
 
     const [weatherId, setWeatherId] = React.useState(0)
@@ -91,11 +92,20 @@ function Game(props) {
         setWeatherId(weatherId + 1)
     }
 
+    const [markWasRounded, setMarkWasRounded] = React.useState(false)
+    const onWeatherMarkReached = () => {
+        if( ! markWasRounded ){
+            setIsSailingUpwind('downwind');
+            props.bm.setUpDown(false)
+            setMarkWasRounded(true)
+        }
+    }
+
     const [gameStats, setGameStats] = React.useState(props.gs.getStats())
 
     useEffect(() => {
         const interval = setInterval(() => {
-            if ( props.bm.isFinishLineCrossed() ){
+            if ( props.bm.isFinishLineCrossed() && markWasRounded){
                 if ( gameState === GAME_STATE_RUNNING){
                     // Update the score
                     props.gs.addScore(props.bm)
@@ -105,14 +115,15 @@ function Game(props) {
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [props.gs, props.bm, gameState]);
+    }, [props.gs, props.bm, gameState, markWasRounded]);
 
     const onOpponentsSelected = (gsInd) => {
         props.bm.setOpponents(props.gs.getTracks(gsInd))
     }
 
-    const highLabel = updown === 'upwind' ? 'Pinch' : 'Heat'
-    const lowLabel = updown === 'upwind' ? 'Foot' : 'Soak'
+
+    const highLabel = isSailingUpwind === 'upwind' ? 'Pinch' : 'Heat'
+    const lowLabel = isSailingUpwind === 'upwind' ? 'Foot' : 'Soak'
 
     let startPauseResumeLabel = ''
     let startPauseResumeIcon = ''
@@ -137,18 +148,33 @@ function Game(props) {
     const startPauseResumeButton = startPauseResumeLabel === '' ?
         '' : <Button variant="contained" endIcon={startPauseResumeIcon} onClick={toggleGameState}>{startPauseResumeLabel}</Button>
 
+
+    const lr = [
+        {value: 'stbd', label: 'Starboard'},
+        {value: 'port', label: 'Port'},
+    ]
+    const left = isSailingUpwind === 'upwind' ? lr[0] : lr[1]
+    const right = isSailingUpwind === 'upwind' ? lr[1] : lr[0]
+
+    const weatherMarkRadiusPix = 10
+
+    const stageRotation = isSailingUpwind === 'upwind'
+        ?{rotation:0, offsetX:0, offsetY:0}
+        :{rotation:180, offsetX:props.stageWidth/2, offsetY:props.stageHeight}
+
     return (
         <div>
             <div>
                 <Grid container spacing={2}>
                     <Grid xs={10} >
                         <Stage width={props.stageWidth} height={props.stageHeight}>
-                            <Layer>
+                            <Layer rotation={stageRotation.rotation} offsetY={stageRotation.offsetY} offsetX={stageRotation.offsetX}>
                                 <WindField width={props.stageWidth} height={props.stageHeight} nrows={props.wm.nrows}
                                            ncols={props.wm.ncols} wm={props.wm} showControls={showControls}
                                            weatherId={weatherId}/>
-                                <Boat milesInPixel={props.milesInPixel} bm={props.bm} />
-                                <RaceCourse milesInPixel={props.milesInPixel} rc={props.rc}/>
+                                <Boat milesInPixel={props.milesInPixel} bm={props.bm} rc={props.rc}
+                                      weatherMarkRadiusPix={weatherMarkRadiusPix} onWeatherMarkReached={onWeatherMarkReached}/>
+                                <RaceCourse weatherMarkRadiusPix={weatherMarkRadiusPix} milesInPixel={props.milesInPixel} rc={props.rc} markWasRounded={markWasRounded}/>
                             </Layer>
                         </Stage>
                     </Grid>
@@ -165,13 +191,13 @@ function Game(props) {
                         <RadioGroup row aria-labelledby="demo-row-radio-buttons-group-label" name="tack-group"
                                     value={tack}
                                     onChange={handleTackChange}>
-                            <FormControlLabel value="stbd" control={<Radio />} label="Starboard" />
-                            <FormControlLabel value="port" control={<Radio />} label="Port" />
+                            <FormControlLabel value={left.value} control={<Radio />} label={left.label} />
+                            <FormControlLabel value={right.value} control={<Radio />} label={right.label} />
                         </RadioGroup>
                     </Grid>
                     <Grid xs={3}>
                         <RadioGroup aria-labelledby="demo-radio-buttons-group-label" name="dir-group"
-                                    value={updown}
+                                    value={isSailingUpwind}
                                     onChange={handleUpDownChange}>
                             <FormControlLabel value="upwind" control={<Radio />} label="Upwind" />
                             <FormControlLabel value="downwind" control={<Radio />} label="Downwind" />
