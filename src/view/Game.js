@@ -40,10 +40,16 @@ function Game(props) {
         props.bm.setAdjustmentAngle(0)
     };
 
-    const [isSailingUpwind, setIsSailingUpwind] = React.useState('upwind');
+    const [pointOfSail, setPointOfSail] = React.useState('upwind');
     const handleUpDownChange = (event) => {
-        setIsSailingUpwind(event.target.value);
-        props.bm.setUpDown(event.target.value === 'upwind')
+        setPointOfSail(event.target.value);
+        if (event.target.value === 'reach'){
+            props.bm.setAdjustmentAngle(90)
+        }
+        else{
+            props.bm.setUpDown(event.target.value === 'upwind')
+            props.bm.setAdjustmentAngle(0)
+        }
     };
 
     const [adjustment, setAdjustment] = React.useState('target');
@@ -82,7 +88,7 @@ function Game(props) {
         setGameState(GAME_STATE_READY)
         setTack('stbd');
         props.bm.setTack(true)
-        setIsSailingUpwind('upwind');
+        setPointOfSail('upwind');
         props.bm.setUpDown(true)
         props.bm.stopGame()
         setMarkWasRounded(false)
@@ -97,7 +103,7 @@ function Game(props) {
     const [markWasRounded, setMarkWasRounded] = React.useState(false)
     const onWeatherMarkReached = () => {
         if( ! markWasRounded ){
-            setIsSailingUpwind('downwind');
+            setPointOfSail('downwind');
             props.bm.setUpDown(false)
             setMarkWasRounded(true)
         }
@@ -124,8 +130,8 @@ function Game(props) {
     }
 
 
-    const highLabel = isSailingUpwind === 'upwind' ? 'Pinch' : 'Heat'
-    const lowLabel = isSailingUpwind === 'upwind' ? 'Foot' : 'Soak'
+    const highLabel = pointOfSail === 'upwind' ? 'Pinch' : 'Heat'
+    const lowLabel = pointOfSail === 'upwind' ? 'Foot' : 'Soak'
 
     let startPauseResumeLabel = ''
     let startPauseResumeIcon = ''
@@ -155,12 +161,12 @@ function Game(props) {
         {value: 'stbd', label: 'Starboard'},
         {value: 'port', label: 'Port'},
     ]
-    const left = isSailingUpwind === 'upwind' ? lr[0] : lr[1]
-    const right = isSailingUpwind === 'upwind' ? lr[1] : lr[0]
+    const left = pointOfSail === 'upwind' || pointOfSail === 'reach'? lr[0] : lr[1]
+    const right = pointOfSail === 'upwind' || pointOfSail === 'reach'? lr[1] : lr[0]
 
     const weatherMarkRadiusPix = 10
 
-    const stageRotation = isSailingUpwind === 'upwind'
+    const stageRotation = pointOfSail === 'upwind' || pointOfSail === 'reach'
         ?{rotation:0, offsetX:0, offsetY:0}
         :{rotation:180, offsetX:props.stageWidth/2, offsetY:props.stageHeight}
 
@@ -202,15 +208,16 @@ function Game(props) {
                                     value={adjustment}
                                     onChange={handleAdjustment}>
                             <FormControlLabel value="high" control={<Radio />} label={highLabel} />
-                            <FormControlLabel value="target" control={<Radio />} label="target" />
+                            <FormControlLabel value="target" control={<Radio />} label="Target" />
                             <FormControlLabel value="low" control={<Radio />} label={lowLabel} />
                         </RadioGroup>
                     </Grid>
                     <Grid xs={3}>
                         <RadioGroup aria-labelledby="demo-radio-buttons-group-label" name="dir-group"
-                                    value={isSailingUpwind}
+                                    value={pointOfSail}
                                     onChange={handleUpDownChange}>
                             <FormControlLabel value="upwind" control={<Radio />} label="Upwind" />
+                            <FormControlLabel value="reach" control={<Radio />} label="Reach" />
                             <FormControlLabel value="downwind" control={<Radio />} label="Downwind" />
                         </RadioGroup>
                     </Grid>

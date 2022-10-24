@@ -102,6 +102,10 @@ class BoatModel {
 
     getTwa(targets) {
         let twa = targets.twa + this.adjustmentAngle
+
+        if ( this.adjustmentAngle === 90)  // Special case for reach course
+            twa = 90
+
         if (twa < 0)
             twa = 0
         if (twa > 180)
