@@ -7,8 +7,6 @@ function WindField(props) {
     const cells = props.wm.cells;
     const side = Math.min(props.height / props.nrows, props.width / props.ncols)
 
-    console.log("Rendering wind field", props.weatherId)
-
     const WindCells = cells.map((cell, i) => {
         const row = Math.floor(i / props.ncols)
         const col = i % props.ncols

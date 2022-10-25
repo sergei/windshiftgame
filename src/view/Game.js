@@ -25,6 +25,8 @@ const GAME_STATE_FINISHED = 'finished' // Done button is shown, opponents select
 
 function Game(props) {
 
+    const [layLine, setLayLLne] = React.useState(props.bm.layLine);
+
     const [gameState, setGameState] = React.useState(GAME_STATE_READY);
 
     const [showControls, setShowControls] = React.useState(false);
@@ -89,23 +91,39 @@ function Game(props) {
         setTack('stbd');
         props.bm.setTack(true)
         setPointOfSail('upwind');
+        props.bm.setAdjustmentAngle(0)
+        setAdjustment('target');
         props.bm.setUpDown(true)
         props.bm.stopGame()
         setMarkWasRounded(false)
+        setLayLineCrossed(false)
     }
 
     const [weatherId, setWeatherId] = React.useState(0)
     const changeWeather = () => {
         props.wm.generateField()
+        props.bm.computeLayLines()
+        setLayLLne(props.bm.layLine)
         setWeatherId(weatherId + 1)
     }
 
     const [markWasRounded, setMarkWasRounded] = React.useState(false)
     const onWeatherMarkReached = () => {
-        if( ! markWasRounded ){
+        if( layLineCrossed && ! markWasRounded ){
             setPointOfSail('downwind');
             props.bm.setUpDown(false)
             setMarkWasRounded(true)
+        }
+    }
+
+    const [layLineCrossed, setLayLineCrossed] = React.useState(false)
+    const onLayLineCrossed = () => {
+        if( ! layLineCrossed ){
+            setTack('stbd');
+            props.bm.setTack(true)
+            setAdjustment('target');
+            props.bm.setAdjustmentAngle(0)
+            setLayLineCrossed(true)
         }
     }
 
@@ -170,7 +188,6 @@ function Game(props) {
         ?{rotation:0, offsetX:0, offsetY:0}
         :{rotation:180, offsetX:props.stageWidth, offsetY:props.stageHeight}
 
-    console.log(`w = ${props.stageWidth}`)
     return (
         <div>
             <div>
@@ -183,9 +200,10 @@ function Game(props) {
                                 <WindField width={props.stageWidth} height={props.stageHeight} nrows={props.wm.nrows}
                                            ncols={props.wm.ncols} wm={props.wm} showControls={showControls}
                                            weatherId={weatherId}/>
+                                <RaceCourse weatherMarkRadiusPix={weatherMarkRadiusPix} milesInPixel={props.milesInPixel}
+                                            rc={props.rc} layLine={layLine} markWasRounded={markWasRounded}  layLineCrossed={layLineCrossed}/>
                                 <Boat milesInPixel={props.milesInPixel} bm={props.bm} rc={props.rc}
-                                      weatherMarkRadiusPix={weatherMarkRadiusPix} onWeatherMarkReached={onWeatherMarkReached}/>
-                                <RaceCourse weatherMarkRadiusPix={weatherMarkRadiusPix} milesInPixel={props.milesInPixel} rc={props.rc} markWasRounded={markWasRounded}/>
+                                      weatherMarkRadiusPix={weatherMarkRadiusPix} onWeatherMarkReached={onWeatherMarkReached} onLayLineCrossed={onLayLineCrossed} />
                             </Layer>
                         </Stage>
                     </Grid>

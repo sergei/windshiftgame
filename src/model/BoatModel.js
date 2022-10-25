@@ -14,6 +14,8 @@ class BoatModel {
     timeMs = 0
     boatSpeedKts = 0
     vmgKts = 0
+    layLine = [0, 0, 0, 0]
+    layLineCrossed = false
 
     constructor(windField, raceCourse, x, y) {
         this.windField = windField
@@ -28,8 +30,8 @@ class BoatModel {
         this.opponents = opponents
     }
 
-    setTack(isStartBoard) {
-        this.isStartBoard = isStartBoard
+    setTack(isStarBoard) {
+        this.isStartBoard = isStarBoard
     }
 
     setUpDown(isUpWind) {
@@ -56,6 +58,7 @@ class BoatModel {
         const targets = this.polarTable.getTargets(ci.tws, this.isUpWind)
         let twa = this.getTwa(targets);
         this.hdg = ci.twd + twa
+        this.layLineCrossed = false
     }
 
     setPolarTable(polarTable){
@@ -88,15 +91,22 @@ class BoatModel {
             this.boatSpeedKts = bs
             this.vmgKts = Math.abs(dy)
 
-            const finished = this.checkFinishCrossing()
+            const finishLine = [this.raceCourse.pin.x, this.raceCourse.pin.y,
+                this.raceCourse.rcb.x, this.raceCourse.rcb.y]
+            const finished = this.checkFinishCrossing(finishLine)
             if( finished ){
                 this.elapsedTimeMs = this.timeMs
                 this.isRunning = false
                 this.finished = true
             }
 
+            const layLineCrossed = this.checkFinishCrossing(this.layLine)
+            if( layLineCrossed ){
+                this.layLineCrossed = true
+            }
+
             // console.log('boat NM xy=', this.x, this.y)
-            console.log(`TWA=${twa.toFixed(0)} BS=${bs.toFixed(2)} HDG=${this.hdg.toFixed(0)}`)
+            console.log(`TWA=${twa.toFixed(0)} BS=${bs.toFixed(2)} HDG=${this.hdg.toFixed(0)} layLineCrossed=${layLineCrossed}`)
         }
     }
 
@@ -119,15 +129,16 @@ class BoatModel {
         return this.finished
     }
 
-    checkFinishCrossing() {
+    checkFinishCrossing(lineToCross) {
+
         if( this.trail.length > 10 ){
             const prev_x = this.trail[this.trail.length - 4]
             const prev_y = this.trail[this.trail.length - 3]
             const now_x = this.trail[this.trail.length - 2]
             const now_y = this.trail[this.trail.length - 1]
             return  intersects(
-                this.raceCourse.pin.x, this.raceCourse.pin.y,
-                this.raceCourse.rcb.x, this.raceCourse.rcb.y,
+                lineToCross[0], lineToCross[1],
+                lineToCross[2], lineToCross[3],
 
                 prev_x, prev_y,
                 now_x, now_y
@@ -166,6 +177,39 @@ class BoatModel {
 
         return opponents
     }
+
+    computeLayLines() {
+        // Compute starboard windward mark layline
+        const cs = this.windField.getCellInfo(this.raceCourse.wm.x, this.raceCourse.wm.y)
+        let twd = cs.twd
+        if ( twd > 180 )
+            twd = twd - 360
+        const twa = this.polarTable.getTargets(cs.tws, true).twa
+        const gamma = twa - twd  // Angle to the vertical axis
+        // const gamma = 80
+        console.log(`twd=${twd.toFixed(0)} twa=${twa.toFixed(0)} gamma=${gamma.toFixed(0)}`)
+
+        const a = this.windField.cellSide / 2  // Distance to the right border
+        const b = this.windField.cellSide - this.raceCourse.wm.y  // Distance to the bottom of the cell
+
+        // Assume gamma is always in [0; 90)
+        const dx = b * Math.tan(rads(gamma))
+        const dy = a / Math.tan(rads(gamma))
+        console.log(`dx=${dx.toFixed(3)} dy=${dy.toFixed(3)}`)
+
+        let x = this.raceCourse.wm.x + dx
+        let y = this.raceCourse.wm.y + dy
+
+        // Check if it's crossing the side or bottom
+        if ( dx > a ){  // Crossing side
+            x = this.raceCourse.wm.x + a
+        }else {
+            y = this.raceCourse.wm.y + b
+        }
+
+        this.layLine = [this.raceCourse.wm.x, this.raceCourse.wm.y, x, y]
+    }
+
 }
 
 export default  BoatModel

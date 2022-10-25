@@ -7,46 +7,53 @@ import BoatModel from "./model/BoatModel";
 import Game from "./view/Game";
 import RaceCourseModel from "./model/RaceCourseModel";
 import GameStorage from "./model/GameStorage";
+import {useEffect, useState} from "react";
 
 function App() {
-    const maxStageWidth = window.innerWidth
-    const maxStageHeight = window.innerHeight* 0.7
-    const stageHeightMiles = 1.
-    const milesInPixel = stageHeightMiles / maxStageHeight
 
-    const wm = new WindFieldModel(maxStageHeight * milesInPixel, maxStageWidth * milesInPixel);
+    const [game, setGame] = useState(<div>Loading ...</div>)
 
-    const stageWidthPix = wm.ncols * wm.cellSide / milesInPixel
-    const stageHeightPix = wm.nrows * wm.cellSide / milesInPixel
+    useEffect(() => {
+        const maxStageWidth = window.innerWidth
+        const maxStageHeight = window.innerHeight* 0.7
+        const stageHeightMiles = 1.
+        const milesInPixel = stageHeightMiles / maxStageHeight
 
-    // Set boat initial position in the middle of the bottom row
+        const wm = new WindFieldModel(maxStageHeight * milesInPixel, maxStageWidth * milesInPixel);
 
-    const rc = new RaceCourseModel(wm.ncols, wm.nrows, wm.cellSide)
-    console.log(`rc = ${JSON.stringify(rc)}`)
-    const boatX = (rc.rcb.x + rc.pin.x) / 2
-    const boatY = rc.rcb.y
-    console.log(`boatx = ${boatX} boaty = ${boatY}`)
+        const stageWidthPix = wm.ncols * wm.cellSide / milesInPixel
+        const stageHeightPix = wm.nrows * wm.cellSide / milesInPixel
 
+        const rc = new RaceCourseModel(wm.ncols, wm.nrows, wm.cellSide)
 
-    const gs = new GameStorage()
+        // Set boat initial position in the middle of start line
+        const boatX = (rc.rcb.x + rc.pin.x) / 2
+        const boatY = rc.rcb.y
 
-    const bm = new BoatModel(wm, rc, boatX, boatY)
+        const gs = new GameStorage()
 
-    fetch(polar_text_j105)
-        .then(r => r.text())
-        .then(data => {
-            const pt = new PolarTable(data)
-            bm.setPolarTable(pt)
-        })
-        .catch(reason => {
-            console.log("Error " + reason)
-        });
+        const bm = new BoatModel(wm, rc, boatX, boatY)
 
-    return (
-          <div>
-              <Game stageWidth={stageWidthPix} stageHeight={stageHeightPix} milesInPixel={milesInPixel} wm={wm} bm={bm} rc={rc} gs={gs}/>
-          </div>
-      );
+        function loadData() {
+            fetch(polar_text_j105)
+                .then(r => r.text())
+                .then(data => {
+                    const pt = new PolarTable(data)
+                    bm.setPolarTable(pt)
+                    bm.computeLayLines()
+                    setGame(<Game stageWidth={stageWidthPix} stageHeight={stageHeightPix} milesInPixel={milesInPixel}
+                                  wm={wm} bm={bm} rc={rc} gs={gs}/>)
+                })
+                .catch(reason => {
+                    setGame (<div> "Error " + reason </div>)
+                });
+        }
+
+        loadData();
+
+    }, []);
+
+    return (game)
 }
 
 export default App;

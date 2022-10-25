@@ -7,8 +7,6 @@ function WindCell(props) {
 
     const [cellData, setCellData] = useState(props.wm.cells[props.idx]);
 
-    console.log("Rendering wind cell " + props.idx)
-
     const windR =  props.side/2 * cellData.tws / props.wm.MAX_WIND_SPEED
     const currR =  props.side/2 * cellData.cs / props.wm.MAX_CURR_SPEED
 

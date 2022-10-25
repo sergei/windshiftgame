@@ -54,6 +54,10 @@ function Boat(props) {
         props.onWeatherMarkReached()
     }
 
+    if ( props.bm.layLineCrossed ){
+        props.onLayLineCrossed()
+    }
+
     return (
         <Group>
             {opponents}
