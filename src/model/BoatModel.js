@@ -186,16 +186,16 @@ class BoatModel {
             twd = twd - 360
         const twa = this.polarTable.getTargets(cs.tws, true).twa
         const gamma = twa - twd  // Angle to the vertical axis
-        // const gamma = 80
-        console.log(`twd=${twd.toFixed(0)} twa=${twa.toFixed(0)} gamma=${gamma.toFixed(0)}`)
+        // console.log(`twd=${twd.toFixed(0)} twa=${twa.toFixed(0)} gamma=${gamma.toFixed(0)}`)
 
-        const a = this.windField.cellSide / 2  // Distance to the right border
+        const isMarkBetweenCols = this.windField.ncols % 2 === 0
+        const a = isMarkBetweenCols ? this.windField.cellSide : this.windField.cellSide / 2  // Distance to the right border
         const b = this.windField.cellSide - this.raceCourse.wm.y  // Distance to the bottom of the cell
 
         // Assume gamma is always in [0; 90)
         const dx = b * Math.tan(rads(gamma))
         const dy = a / Math.tan(rads(gamma))
-        console.log(`dx=${dx.toFixed(3)} dy=${dy.toFixed(3)}`)
+        // console.log(`dx=${dx.toFixed(3)} dy=${dy.toFixed(3)}`)
 
         let x = this.raceCourse.wm.x + dx
         let y = this.raceCourse.wm.y + dy
@@ -208,6 +208,7 @@ class BoatModel {
         }
 
         this.layLine = [this.raceCourse.wm.x, this.raceCourse.wm.y, x, y]
+        // console.log(`Layline = ${JSON.stringify(this.layLine)}`)
     }
 
 }

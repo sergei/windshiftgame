@@ -13,6 +13,7 @@ class RaceCourseModel{
             x: ncols * cellSide / 2 + cellSide * 0.4,
             y: nrows * cellSide - cellSide / 8
         }
+        // console.log(`RaceCourseModel ncols=${ncols} nrows=${nrows} cellSide=${cellSide} ${JSON.stringify(this)}`)
     }
 }
 export default RaceCourseModel;

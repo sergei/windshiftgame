@@ -9,7 +9,9 @@ class WindFieldModel{
 
     cells = []
 
-    constructor(height, width ) {
+    constructor(height, width, windGridDims) {
+        this.nrows = windGridDims.nrows
+        this.ncols = windGridDims.ncols
         this.width = width
         this.cellSide = Math.min(height / this.nrows, width / this.ncols)
 

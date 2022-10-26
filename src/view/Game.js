@@ -1,16 +1,14 @@
 import {Layer, Stage} from "react-konva";
 import WindField from "./WindField";
 import Boat from "./Boat";
-import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import StopIcon from '@mui/icons-material/Stop';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from "react";
-import {Box, Button, FormControl, Link, Paper, Radio, RadioGroup} from "@mui/material";
+import {Box, Button, FormControl, InputLabel, Link, MenuItem, Paper, Radio, RadioGroup, Select} from "@mui/material";
 import RaceCourse from "./RaceCourse";
 import BoatStats from "./BoatStats";
 import {useEffect} from "react";
@@ -18,21 +16,31 @@ import ScoreBoard from "./ScoreBoard";
 
 // Game states
 
-const GAME_STATE_READY    = 'ready'    // Start button shown, boat is at the start line upwind starboard, opponents selection is enabled
-const GAME_STATE_RUNNING  = 'running'  // Pause button is shown, opponents selection is disabled
-const GAME_STATE_PAUSED   = 'paused'   // Done button is shown, Resume button is shown, opponents selection is disabled
-const GAME_STATE_FINISHED = 'finished' // Done button is shown, opponents selection is enabled
+const GAME_STATE_READY    = 'ready'    // Start button shown, boat is at the start line upwind starboard
+const GAME_STATE_RUNNING  = 'running'  // Pause button is shown
+const GAME_STATE_PAUSED   = 'paused'   // Done button is shown
+const GAME_STATE_FINISHED = 'finished' // Done button is shown
 
 function Game(props) {
+    const [gridDimensions, setGridDimensions] = React.useState('{"nrows":3, "ncols":3}');
+
+    const handleGridChange = (event) => {
+        setGridDimensions(event.target.value);
+        props.onWindGridDimChange(JSON.parse(event.target.value))
+        stopGame()
+    };
 
     const [layLine, setLayLLne] = React.useState(props.bm.layLine);
+    useEffect(() => { setLayLLne(props.bm.layLine)}, [props.bm.layLine] )
+    console.log(`layLine=${layLine}`)
+    console.log(`props.bm.layLine=${props.bm.layLine}`)
 
     const [gameState, setGameState] = React.useState(GAME_STATE_READY);
 
-    const [showControls, setShowControls] = React.useState(false);
-    const handleChangeShowControls = (event) => {
-        setShowControls(event.target.checked);
-    };
+    // const [showControls, setShowControls] = React.useState(false);
+    // const handleChangeShowControls = (event) => {
+    //     setShowControls(event.target.checked);
+    // };
 
     const [tack, setTack] = React.useState('stbd');
     const handleTackChange = (event) => {
@@ -188,93 +196,99 @@ function Game(props) {
         ?{rotation:0, offsetX:0, offsetY:0}
         :{rotation:180, offsetX:props.stageWidth, offsetY:props.stageHeight}
 
+    // noinspection JSValidateTypes
     return (
-        <div>
-            <div>
+        <Box mt={2} pl={2}>
                 <Grid container spacing={2} disableEqualOverflow>
-                    <Grid item xs={1} >
-                    </Grid>
-                    <Grid item style={{ width: props.stageWidth * 1.1 }}  xs={9} >
+                    <Grid container item style={{ width: props.stageWidth  }}  xs={9} >
                         <Stage width={props.stageWidth} height={props.stageHeight}>
                             <Layer rotation={stageRotation.rotation} offsetY={stageRotation.offsetY} offsetX={stageRotation.offsetX}>
                                 <WindField width={props.stageWidth} height={props.stageHeight} nrows={props.wm.nrows}
-                                           ncols={props.wm.ncols} wm={props.wm} showControls={showControls}
-                                           weatherId={weatherId}/>
+                                           ncols={props.wm.ncols} wm={props.wm} showControls={false}
+                                           weatherId={props.weatherId}/>
                                 <RaceCourse weatherMarkRadiusPix={weatherMarkRadiusPix} milesInPixel={props.milesInPixel}
                                             rc={props.rc} layLine={layLine} markWasRounded={markWasRounded}  layLineCrossed={layLineCrossed}/>
                                 <Boat milesInPixel={props.milesInPixel} bm={props.bm} rc={props.rc}
                                       weatherMarkRadiusPix={weatherMarkRadiusPix} onWeatherMarkReached={onWeatherMarkReached} onLayLineCrossed={onLayLineCrossed} />
                             </Layer>
                         </Stage>
+                        <Grid xs={5}>
+                            <RadioGroup row aria-labelledby="demo-row-radio-buttons-group-label" name="tack-group"
+                                        value={tack}
+                                        onChange={handleTackChange}>
+                                <FormControlLabel value={left.value} control={<Radio />} label={left.label} />
+                                <FormControlLabel value={right.value} control={<Radio />} label={right.label} />
+                            </RadioGroup>
+                        </Grid>
+                        <Grid xs={4}>
+                            <RadioGroup aria-labelledby="demo-radio-buttons-group-label" name="adj-group"
+                                        value={adjustment}
+                                        onChange={handleAdjustment}>
+                                <FormControlLabel value="high" control={<Radio />} label={highLabel} />
+                                <FormControlLabel value="target" control={<Radio />} label="Target" />
+                                <FormControlLabel value="low" control={<Radio />} label={lowLabel} />
+                            </RadioGroup>
+                        </Grid>
+                        <Grid xs={3}>
+                            <RadioGroup aria-labelledby="demo-radio-buttons-group-label" name="dir-group"
+                                        value={pointOfSail}
+                                        onChange={handleUpDownChange}>
+                                <FormControlLabel value="upwind" control={<Radio />} label="Upwind" />
+                                <FormControlLabel value="reach" control={<Radio />} label="Reach" />
+                                <FormControlLabel value="downwind" control={<Radio />} label="Downwind" />
+                            </RadioGroup>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={2} >
-                        <Box mt={1}>
+                    <Grid item xs={3} >
+                        <Box mt={2} pl={2}>
                             <Link href="https://github.com/sergei/windshiftgame/wiki" target="_blank"  rel="noopener">Help</Link>
                         </Box>
-                        <Box  mt={2}>
+                        <Box  mt={2} px={2}>
                             <Paper elevation={1} >
                                 <BoatStats bm={props.bm}/>
                             </Paper>
                         </Box>
-                        <Box  mt={2}>
+                        <Box  mt={2} px={2} >
                             <Paper elevation={1} >
                                 <ScoreBoard gameStats={gameStats} onOpponentsSelected={onOpponentsSelected}/>
                             </Paper>
                         </Box>
+                        <Box mt={2} pl={2}>
+                            <Paper elevation={1} >
+                                <Box mt={2} px={2}>
+                                    {startPauseResumeButton}
+                                </Box>
+                                <Box mt={2} px={2}>
+                                    {doneButton}
+                                </Box>
+                                <Box mt={2} px={2}>
+                                    <Button variant="contained" endIcon={<AutorenewIcon />} onClick={changeWeather}>
+                                        Change weather
+                                    </Button>
+                                </Box>
+                                <Box mt={2} px={2}>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="grid-dims-select-label">Grid</InputLabel>
+                                        <Select
+                                            labelId="grid-dims-select-label"
+                                            id="grid-dims-select"
+                                            value={gridDimensions}
+                                            label="Grid"
+                                            onChange={handleGridChange}
+                                        >
+                                            <MenuItem value={'{"nrows":2, "ncols":1}'}>2x1</MenuItem>
+                                            <MenuItem value={'{"nrows":2, "ncols":3}'}>2x3</MenuItem>
+                                            <MenuItem value={'{"nrows":2, "ncols":2}'}>2x2</MenuItem>
+                                            <MenuItem value={'{"nrows":3, "ncols":3}'}>3x3</MenuItem>
+                                            <MenuItem value={'{"nrows":4, "ncols":4}'}>4x4</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                            </Paper>
+                        </Box>
                     </Grid>
                 </Grid>
-            </div>
-            <div>
-                <FormControl>
-                <Grid container spacing={2}>
-                    <Grid item xs={1} >
-                    </Grid>
-                    <Grid xs={3}>
-                        <RadioGroup row aria-labelledby="demo-row-radio-buttons-group-label" name="tack-group"
-                                    value={tack}
-                                    onChange={handleTackChange}>
-                            <FormControlLabel value={left.value} control={<Radio />} label={left.label} />
-                            <FormControlLabel value={right.value} control={<Radio />} label={right.label} />
-                        </RadioGroup>
-                    </Grid>
-                    <Grid xs={3}>
-                        <RadioGroup aria-labelledby="demo-radio-buttons-group-label" name="adj-group"
-                                    value={adjustment}
-                                    onChange={handleAdjustment}>
-                            <FormControlLabel value="high" control={<Radio />} label={highLabel} />
-                            <FormControlLabel value="target" control={<Radio />} label="Target" />
-                            <FormControlLabel value="low" control={<Radio />} label={lowLabel} />
-                        </RadioGroup>
-                    </Grid>
-                    <Grid xs={3}>
-                        <RadioGroup aria-labelledby="demo-radio-buttons-group-label" name="dir-group"
-                                    value={pointOfSail}
-                                    onChange={handleUpDownChange}>
-                            <FormControlLabel value="upwind" control={<Radio />} label="Upwind" />
-                            <FormControlLabel value="reach" control={<Radio />} label="Reach" />
-                            <FormControlLabel value="downwind" control={<Radio />} label="Downwind" />
-                        </RadioGroup>
-                    </Grid>
-                    <Grid xs={2}>
-                        <FormGroup>
-                            <FormControlLabel control={<Checkbox checked={showControls} onChange={handleChangeShowControls}/>} label="Show controls" />
-                        </FormGroup>
-                    </Grid>
-                    <Grid xs={4} >
-                        <Button variant="contained" endIcon={<AutorenewIcon />} onClick={changeWeather}>
-                            Change weather
-                        </Button>
-                    </Grid>
-                    <Grid xs={4} >
-                        {startPauseResumeButton}
-                    </Grid>
-                    <Grid xs={4} >
-                        {doneButton}
-                    </Grid>
-                </Grid>
-                </FormControl>
-            </div>
-        </div>
+        </Box>
     );
 
 }
