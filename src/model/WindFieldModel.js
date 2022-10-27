@@ -8,6 +8,7 @@ class WindFieldModel{
     nrows = 3;
 
     cells = []
+    useCurrent = false
 
     constructor(height, width, windGridDims) {
         this.nrows = windGridDims.nrows
@@ -34,9 +35,13 @@ class WindFieldModel{
                 twd: this.randomDirection(0, 30),
                 tws: this.randomSpeed(10, 5, 5),
                 cd: this.randomDirection(0, 180),
-                cs:  this.randomSpeed(2, 0, 2),
+                cs: this.randomSpeed(1, 0, 1),
             }
         }
+    }
+
+    setUseCurrent(useCurrent) {
+        this.useCurrent = useCurrent
     }
 
     randomDirection(mean, range){

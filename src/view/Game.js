@@ -8,11 +8,24 @@ import PauseIcon from '@mui/icons-material/Pause';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import Grid from '@mui/material/Unstable_Grid2';
 import * as React from "react";
-import {Box, Button, FormControl, InputLabel, Link, MenuItem, Paper, Radio, RadioGroup, Select} from "@mui/material";
+import {
+    Box,
+    Button,
+    FormControl,
+    FormGroup,
+    InputLabel,
+    Link,
+    MenuItem,
+    Paper,
+    Radio,
+    RadioGroup,
+    Select
+} from "@mui/material";
 import RaceCourse from "./RaceCourse";
 import BoatStats from "./BoatStats";
 import {useEffect} from "react";
 import ScoreBoard from "./ScoreBoard";
+import Checkbox from "@mui/material/Checkbox";
 
 // Game states
 
@@ -32,8 +45,6 @@ function Game(props) {
 
     const [layLine, setLayLLne] = React.useState(props.bm.layLine);
     useEffect(() => { setLayLLne(props.bm.layLine)}, [props.bm.layLine] )
-    console.log(`layLine=${layLine}`)
-    console.log(`props.bm.layLine=${props.bm.layLine}`)
 
     const [gameState, setGameState] = React.useState(GAME_STATE_READY);
 
@@ -41,6 +52,15 @@ function Game(props) {
     // const handleChangeShowControls = (event) => {
     //     setShowControls(event.target.checked);
     // };
+
+    const [simulateCurrent, setSimulateCurrent] = React.useState(props.wm.useCurrent);
+    const handleChangeSimulateCurrent = (event) => {
+        setSimulateCurrent(event.target.checked);
+        props.wm.setUseCurrent(event.target.checked)
+        props.bm.computeLayLines()
+        setLayLLne(props.bm.layLine)
+        setWeatherId(weatherId + 1)
+    };
 
     const [tack, setTack] = React.useState('stbd');
     const handleTackChange = (event) => {
@@ -205,7 +225,7 @@ function Game(props) {
                             <Layer rotation={stageRotation.rotation} offsetY={stageRotation.offsetY} offsetX={stageRotation.offsetX}>
                                 <WindField width={props.stageWidth} height={props.stageHeight} nrows={props.wm.nrows}
                                            ncols={props.wm.ncols} wm={props.wm} showControls={false}
-                                           weatherId={props.weatherId}/>
+                                           weatherId={props.weatherId} showCurrent={simulateCurrent}/>
                                 <RaceCourse weatherMarkRadiusPix={weatherMarkRadiusPix} milesInPixel={props.milesInPixel}
                                             rc={props.rc} layLine={layLine} markWasRounded={markWasRounded}  layLineCrossed={layLineCrossed}/>
                                 <Boat milesInPixel={props.milesInPixel} bm={props.bm} rc={props.rc}
@@ -266,6 +286,13 @@ function Game(props) {
                                         Change weather
                                     </Button>
                                 </Box>
+
+                                <Box mt={2} px={2}>
+                                    <FormGroup>
+                                        <FormControlLabel control={<Checkbox checked={simulateCurrent} onChange={handleChangeSimulateCurrent}/>} label="Simulate Current" />
+                                    </FormGroup>
+                                </Box>
+
                                 <Box mt={2} px={2}>
                                     <FormControl fullWidth>
                                         <InputLabel id="grid-dims-select-label">Grid</InputLabel>

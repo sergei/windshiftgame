@@ -1,31 +1,21 @@
 import React, {useState} from 'react';
-import {Arrow, Group, Rect} from "react-konva";
+import {Group, Rect, Text} from "react-konva";
 import VectorControl from "./VectorControl";
-import {rads} from "../utils/Utils";
+import WindPointer from "./WindPointer";
+import CurrentPointer from "./CurrentPointer";
 
 function WindCell(props) {
 
     const [cellData, setCellData] = useState(props.wm.cells[props.idx]);
 
     const windR =  props.side/2 * cellData.tws / props.wm.MAX_WIND_SPEED
-    const currR =  props.side/2 * cellData.cs / props.wm.MAX_CURR_SPEED
+    const currR =  props.side/4 * cellData.cs / props.wm.MAX_WIND_SPEED
 
-    const xc = props.side/2
-    const yc = props.side/2
+    const windX = props.side/2
+    const windY = props.side/2
 
-    function arrowPoints(x, y, r, angle) {
-        const alpha = rads(angle)
-        const xs = x + r * Math.sin(alpha)
-        const ys = y - r * Math.cos(alpha)
-
-        const xe = x - r * Math.sin(alpha)
-        const ye = y + r * Math.cos(alpha)
-
-        return [xs, ys, xs, ys, xe, ye];
-    }
-
-    const windPoints = arrowPoints(xc, yc, windR, props.wm.cells[props.idx].twd);
-    const currPoints = arrowPoints(xc, yc, currR, props.wm.cells[props.idx].cd);
+    const currX = props.side/4 * 2
+    const currY = props.side/4 * 2
 
     const vcr = props.side/12;
     const xwc = vcr * 4
@@ -85,18 +75,30 @@ function WindCell(props) {
 
     }
 
+    const windString = `TWS ${props.wm.cells[props.idx].tws.toFixed(0)} kts TWD ${props.wm.cells[props.idx].tws.toFixed(0)}°`
+    const currentString = `CS ${props.wm.cells[props.idx].cs.toFixed(1)} kts CD ${props.wm.cells[props.idx].cd.toFixed(0)}°`
+
+    const windTextX = props.side / 32;
+    const windTextY = props.side / 16 + props.side / 8 ;
+    const currTextX = props.side / 32;
+    const currTextY = props.side / 16 * 2 + props.side / 8;
+
     return (
         <Group x={props.x} y={props.y}>
 
             <Rect width={props.side} height={props.side} stroke="lightgrey" />
 
-            <Arrow points={windPoints} stroke={'lightblue'} pointerLength={10} pointerWidth={12} />
+            <WindPointer x={windX} y={windY} r={windR} twd={props.wm.cells[props.idx].twd}/>
 
-            {/*<Arrow points={currPoints} stroke={'red'} pointerLength={10} pointerWidth={12} />*/}
+            {props.showCurrent ?  <CurrentPointer x={currX} y={currY} r={currR} cs={props.wm.cells[props.idx].cs} cd={props.wm.cells[props.idx].cd}  /> : ''}
+
+            <Text x={windTextX} y={windTextY} text={windString} fill={'lightgrey'}/>
+
+            <Text x={currTextX} y={currTextY} text={currentString} fill={'lightgrey'}/>
 
             {windControl}
 
-            {currentControl}
+            {props.showCurrent ?  currentControl : ''}
 
         </Group>
     );

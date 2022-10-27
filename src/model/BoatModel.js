@@ -77,19 +77,28 @@ class BoatModel {
             let twa = this.getTwa(targets);
             this.hdg = ci.twd + twa
 
+            // For now don't adjust wind angle for current
             const bs = this.polarTable.getTargetSpeed(ci.tws, twa)
-            const dx = bs * Math.sin(rads(this.hdg))
-            const dy = - bs * Math.cos(rads(this.hdg))
+            const dxw = bs * Math.sin(rads(this.hdg))
+            const dyw = - bs * Math.cos(rads(this.hdg))
+
+            let dxc = 0
+            let dyc = 0
+            if ( this.windField.useCurrent ) {
+                dxc =  - ci.cs * Math.sin(rads(ci.cd))
+                dyc =  ci.cs * Math.cos(rads(ci.cd))
+            }
+
             const dtHours = dtMs / 1000. / 3600.
-            this.x += dx * dtHours
-            this.y += dy * dtHours
+            this.x += (dxw + dxc) * dtHours
+            this.y += (dyw + dyc) * dtHours
             this.trail.push(this.x)
             this.trail.push(this.y)
 
             this.distanceMeters += bs * dtHours * 1852
             this.timeMs += dtMs
             this.boatSpeedKts = bs
-            this.vmgKts = Math.abs(dy)
+            this.vmgKts = Math.abs(dyw)
 
             const finishLine = [this.raceCourse.pin.x, this.raceCourse.pin.y,
                 this.raceCourse.rcb.x, this.raceCourse.rcb.y]
@@ -106,7 +115,7 @@ class BoatModel {
             }
 
             // console.log('boat NM xy=', this.x, this.y)
-            console.log(`TWA=${twa.toFixed(0)} BS=${bs.toFixed(2)} HDG=${this.hdg.toFixed(0)} layLineCrossed=${layLineCrossed}`)
+            // console.log(`TWA=${twa.toFixed(0)} BS=${bs.toFixed(2)} HDG=${this.hdg.toFixed(0)} layLineCrossed=${layLineCrossed}`)
         }
     }
 
@@ -185,7 +194,34 @@ class BoatModel {
         if ( twd > 180 )
             twd = twd - 360
         const twa = this.polarTable.getTargets(cs.tws, true).twa
-        const gamma = twa - twd  // Angle to the vertical axis
+
+        let gamma = twa - twd  // Angle to the vertical axis (negative heading)
+
+        if ( this.windField.useCurrent ) {
+            // For now don't adjust wind angle for current
+
+            // Boat movement due to current
+            const dxc =  - cs.cs * Math.sin(rads(cs.cd))
+            const dyc =  cs.cs * Math.cos(rads(cs.cd))
+            // console.log(`cd=${cs.cd.toFixed(0)} dxc=${dxc.toFixed(3)} dyc=${dyc.toFixed(3)}`)
+
+            // Boat movement due to the wind
+            const bs = this.polarTable.getTargetSpeed(cs.tws, twa)
+            const hdg = twd - twa
+            const dxw = bs * Math.sin(rads(hdg))
+            const dyw = - bs * Math.cos(rads(hdg))
+
+            // console.log(`hdg=${hdg.toFixed(0)} dxw=${dxw.toFixed(3)} dyw=${dyw.toFixed(3)}`)
+
+            // Boat heading adjusted for current
+            const dx = dxw + dxc;
+            const dy = dyw + dyc;
+            const adjHdg = degrees(Math.atan2(dx, -dy ))
+
+            // console.log(`adjHdg=${adjHdg.toFixed(0)} dx=${dx.toFixed(3)} dy=${dy.toFixed(3)}`)
+            gamma = - adjHdg
+        }
+
         // console.log(`twd=${twd.toFixed(0)} twa=${twa.toFixed(0)} gamma=${gamma.toFixed(0)}`)
 
         const isMarkBetweenCols = this.windField.ncols % 2 === 0

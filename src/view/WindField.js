@@ -24,6 +24,7 @@ function WindField(props) {
             wm={props.wm}
             showControls={props.showControls}
             weatherId={props.weatherId}
+            showCurrent={props.showCurrent}
         />
     })
 
