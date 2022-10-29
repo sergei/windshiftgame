@@ -75,7 +75,7 @@ function WindCell(props) {
 
     }
 
-    const windString = `TWS ${props.wm.cells[props.idx].tws.toFixed(0)} kts TWD ${props.wm.cells[props.idx].tws.toFixed(0)}°`
+    const windString = `TWS ${props.wm.cells[props.idx].tws.toFixed(0)} kts TWD ${props.wm.cells[props.idx].twd.toFixed(0)}°`
     const currentString = `CS ${props.wm.cells[props.idx].cs.toFixed(1)} kts CD ${props.wm.cells[props.idx].cd.toFixed(0)}°`
 
     const windTextX = props.side / 32;
@@ -94,7 +94,7 @@ function WindCell(props) {
 
             <Text x={windTextX} y={windTextY} text={windString} fill={'lightgrey'}/>
 
-            <Text x={currTextX} y={currTextY} text={currentString} fill={'lightgrey'}/>
+            {props.showCurrent ?  <Text x={currTextX} y={currTextY} text={currentString} fill={'lightgrey'}/> : null }
 
             {windControl}
 

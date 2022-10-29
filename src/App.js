@@ -8,6 +8,8 @@ import BoatModel from "./model/BoatModel";
 import Game from "./view/Game";
 import RaceCourseModel from "./model/RaceCourseModel";
 import GameStorage from "./model/GameStorage";
+import WeatherRouter from "./model/WeatherRouter";
+import ErrorBoundary from "./ErrorBoundary";
 
 function App() {
 
@@ -60,11 +62,21 @@ function App() {
         gameView = <div>Loading...</div>;
     }else{
         const pt = new PolarTable(polarCsv)
+
+        wm.setPolarTable(pt)
+
         bm.setPolarTable(pt)
         bm.computeLayLines()
-        return <Game stageWidth={stageWidthPix} stageHeight={stageHeightPix} milesInPixel={milesInPixel}
-                     wm={wm} bm={bm} rc={rc} gs={gs} onWindGridDimChange={onWindGridDimChange} layLine={[...bm.layLine]}
-        />;
+
+        const wr = new WeatherRouter(rc, wm, bm)
+
+        return (
+                <ErrorBoundary>
+                    <Game stageWidth={stageWidthPix} stageHeight={stageHeightPix} milesInPixel={milesInPixel}
+                             wm={wm} bm={bm} rc={rc} gs={gs} wr={wr} onWindGridDimChange={onWindGridDimChange}
+                             layLine={[...bm.layLine]} fastestRoute={[...wr.upwindRoute]} />
+                </ErrorBoundary>
+            )
     }
 
     return (gameView)

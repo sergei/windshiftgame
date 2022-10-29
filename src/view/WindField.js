@@ -25,6 +25,7 @@ function WindField(props) {
             showControls={props.showControls}
             weatherId={props.weatherId}
             showCurrent={props.showCurrent}
+            useSimpleModel={props.useSimpleModel}
         />
     })
 

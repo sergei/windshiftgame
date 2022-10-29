@@ -29,6 +29,10 @@ function ScoreBoard(props) {
 
     const scoreEntries = props.gameStats.map( (stat,  value) => {
         const labelId = `checkbox-list-secondary-label-${value}`;
+        const elapsedTime = toHHMMSS(stat.elapsedTime / 1000);
+        const totalDistance = stat.distanceMeters.toFixed(0);
+        const upwindTimeMs = toHHMMSS(stat.upwindTimeMs / 1000);
+        const upwindDistanceMeters = stat.upwindDistanceMeters.toFixed(0);
         return (
             <ListItem
                 key={value}
@@ -44,7 +48,9 @@ function ScoreBoard(props) {
             >
                 <ListItemButton>
                     <BoatIcon  style={{ color: stat.color }} />
-                    <ListItemText id={labelId} primary={`${toHHMMSS(stat.elapsedTime / 1000)} ${stat.distanceMeters.toFixed(0)} m`} />
+                    <ListItemText id={labelId}
+                                  primary={`${elapsedTime}\u00A0(${upwindTimeMs}) ${totalDistance}\u00A0m\u00A0(${upwindDistanceMeters}\u00A0m)`}
+                    />
                 </ListItemButton>
             </ListItem>
         )

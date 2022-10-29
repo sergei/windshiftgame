@@ -10,6 +10,8 @@ class GameStorage {
             {
                 elapsedTime: boatModel.elapsedTimeMs,
                 distanceMeters: boatModel.distanceMeters,
+                upwindTimeMs: boatModel.upwindTimeMs,
+                upwindDistanceMeters: boatModel.upwindDistanceMeters,
                 trail: [...boatModel.trail],  // Copy track
                 color: color
             }
@@ -22,6 +24,8 @@ class GameStorage {
                 elapsedTime: stat.elapsedTime,
                 color: stat.color,
                 distanceMeters: stat.distanceMeters,
+                upwindTimeMs: stat.upwindTimeMs,
+                upwindDistanceMeters: stat.upwindDistanceMeters,
             }
         })
     }

@@ -12,6 +12,9 @@ class BoatModel {
     hdg = 45
     distanceMeters = 0
     timeMs = 0
+    upwindDistanceMeters = 0
+    upwindTimeMs = 0
+    markRounded = false
     boatSpeedKts = 0
     vmgKts = 0
     layLine = [0, 0, 0, 0]
@@ -46,6 +49,10 @@ class BoatModel {
         this.isRunning = isRunning
     }
 
+    onMarkRounded () {
+        this.markRounded = true
+    }
+
     stopGame(){
         this.x = this.startX
         this.y = this.startY
@@ -53,7 +60,10 @@ class BoatModel {
         this.isRunning = false
         this.distanceMeters = 0
         this.timeMs = 0
+        this.upwindDistanceMeters = 0
+        this.upwindTimeMs = 0
         this.finished = false
+        this.markRounded = false
         const ci = this.windField.getCellInfo(this.x, this.y)
         const targets = this.polarTable.getTargets(ci.tws, this.isUpWind)
         let twa = this.getTwa(targets);
@@ -71,45 +81,45 @@ class BoatModel {
 
     updatePosition(dtMs) {
         if( this.polarTable != null && this.isRunning){
-
-            const ci = this.windField.getCellInfo(this.x, this.y)
-            const targets = this.polarTable.getTargets(ci.tws, this.isUpWind)
-            let twa = this.getTwa(targets);
-            this.hdg = ci.twd + twa
-
-            // For now don't adjust wind angle for current
-            const bs = this.polarTable.getTargetSpeed(ci.tws, twa)
-            const dxw = bs * Math.sin(rads(this.hdg))
-            const dyw = - bs * Math.cos(rads(this.hdg))
-
-            let dxc = 0
-            let dyc = 0
-            if ( this.windField.useCurrent ) {
-                dxc =  - ci.cs * Math.sin(rads(ci.cd))
-                dyc =  ci.cs * Math.cos(rads(ci.cd))
-            }
+            const move = this.windField.getBoatMovement(this.x, this.y, this.isUpWind, this.isStartBoard, this.adjustmentAngle)
+            this.hdg = move.hdg
+            this.timeMs += dtMs
 
             const dtHours = dtMs / 1000. / 3600.
-            this.x += (dxw + dxc) * dtHours
-            this.y += (dyw + dyc) * dtHours
-            this.trail.push(this.x)
-            this.trail.push(this.y)
+            const x = this.x + move.dx * dtHours
+            const y = this.y + move.dy * dtHours
 
-            this.distanceMeters += bs * dtHours * 1852
-            this.timeMs += dtMs
-            this.boatSpeedKts = bs
-            this.vmgKts = Math.abs(dyw)
+            this.trail.push(x)
+            this.trail.push(y)
+
+            if ( this.windField.isOutside(x, y ) ){
+                this.boatSpeedKts = 0
+                this.vmgKts =0
+                return
+            }
+
+            this.x = x
+            this.y = y
+
+            this.distanceMeters += move.bs * dtHours * 1852
+            this.boatSpeedKts = move.bs
+            this.vmgKts = move.vmgKts
+
+            if ( !this.markRounded ){
+                this.upwindDistanceMeters = this.distanceMeters
+                this.upwindTimeMs = this.timeMs
+            }
 
             const finishLine = [this.raceCourse.pin.x, this.raceCourse.pin.y,
                 this.raceCourse.rcb.x, this.raceCourse.rcb.y]
-            const finished = this.checkFinishCrossing(finishLine)
+            const finished = this.checkLineCrossing(finishLine)
             if( finished ){
                 this.elapsedTimeMs = this.timeMs
                 this.isRunning = false
                 this.finished = true
             }
 
-            const layLineCrossed = this.checkFinishCrossing(this.layLine)
+            const layLineCrossed = this.checkLineCrossing(this.layLine)
             if( layLineCrossed ){
                 this.layLineCrossed = true
             }
@@ -138,7 +148,7 @@ class BoatModel {
         return this.finished
     }
 
-    checkFinishCrossing(lineToCross) {
+    checkLineCrossing(lineToCross) {
 
         if( this.trail.length > 10 ){
             const prev_x = this.trail[this.trail.length - 4]

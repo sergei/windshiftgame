@@ -12,7 +12,6 @@ import {
     Box,
     Button,
     FormControl,
-    FormGroup,
     InputLabel,
     Link,
     MenuItem,
@@ -26,6 +25,8 @@ import BoatStats from "./BoatStats";
 import {useEffect} from "react";
 import ScoreBoard from "./ScoreBoard";
 import Checkbox from "@mui/material/Checkbox";
+import TargetStats from "./TargetStats";
+import TargetRoute from "./TargetRoute";
 
 // Game states
 
@@ -33,6 +34,8 @@ const GAME_STATE_READY    = 'ready'    // Start button shown, boat is at the sta
 const GAME_STATE_RUNNING  = 'running'  // Pause button is shown
 const GAME_STATE_PAUSED   = 'paused'   // Done button is shown
 const GAME_STATE_FINISHED = 'finished' // Done button is shown
+
+const SHOW_TARGET_ROUTE_AFTER_FINISH_NO = 1;
 
 function Game(props) {
     const [gridDimensions, setGridDimensions] = React.useState('{"nrows":3, "ncols":3}');
@@ -46,8 +49,6 @@ function Game(props) {
     const [layLine, setLayLLne] = React.useState(props.bm.layLine);
     useEffect(() => { setLayLLne(props.bm.layLine)}, [props.bm.layLine] )
 
-    const [gameState, setGameState] = React.useState(GAME_STATE_READY);
-
     // const [showControls, setShowControls] = React.useState(false);
     // const handleChangeShowControls = (event) => {
     //     setShowControls(event.target.checked);
@@ -60,6 +61,17 @@ function Game(props) {
         props.bm.computeLayLines()
         setLayLLne(props.bm.layLine)
         setWeatherId(weatherId + 1)
+        setFinishCount(0)
+    };
+
+    const [useSimpleModel, setUseSimpleModel] = React.useState(props.wm.useSimpleModel);
+    const handleUseSimpleModel = (event) => {
+        setUseSimpleModel(event.target.checked);
+        props.wm.setUseSimpleModel(event.target.checked)
+        props.bm.computeLayLines()
+        setLayLLne(props.bm.layLine)
+        setWeatherId(weatherId + 1)
+        setFinishCount(0)
     };
 
     const [tack, setTack] = React.useState('stbd');
@@ -133,6 +145,7 @@ function Game(props) {
         props.bm.computeLayLines()
         setLayLLne(props.bm.layLine)
         setWeatherId(weatherId + 1)
+        setFinishCount(0)
     }
 
     const [markWasRounded, setMarkWasRounded] = React.useState(false)
@@ -140,6 +153,7 @@ function Game(props) {
         if( layLineCrossed && ! markWasRounded ){
             setPointOfSail('downwind');
             props.bm.setUpDown(false)
+            props.bm.onMarkRounded()
             setMarkWasRounded(true)
         }
     }
@@ -155,8 +169,16 @@ function Game(props) {
         }
     }
 
-    const [gameStats, setGameStats] = React.useState(props.gs.getStats())
+    const [targetUpwindRoute, setTargetUpwindRoute] = React.useState([])
+    const [targetDownwindRoute, setTargetDownwindRoute] = React.useState([])
+    const onTargetRouteComputed = () => {
+        setTargetUpwindRoute(props.wr.upwindRoute)
+        setTargetDownwindRoute(props.wr.downwindRoute)
+    }
 
+    const [gameState, setGameState] = React.useState(GAME_STATE_READY);
+    const [gameStats, setGameStats] = React.useState(props.gs.getStats())
+    const [finishCount, setFinishCount] = React.useState(0)
     useEffect(() => {
         const interval = setInterval(() => {
             if ( props.bm.isFinishLineCrossed() && markWasRounded){
@@ -165,11 +187,12 @@ function Game(props) {
                     props.gs.addScore(props.bm)
                     setGameStats(props.gs.getStats())
                     setGameState(GAME_STATE_FINISHED)
+                    setFinishCount(finishCount + 1)
                 }
             }
-        }, 1000);
+        }, 500);
         return () => clearInterval(interval);
-    }, [props.gs, props.bm, gameState, markWasRounded]);
+    }, [props.gs, props.bm, gameState, markWasRounded, finishCount]);
 
     const onOpponentsSelected = (gsInd) => {
         props.bm.setOpponents(props.gs.getTracks(gsInd))
@@ -225,11 +248,16 @@ function Game(props) {
                             <Layer rotation={stageRotation.rotation} offsetY={stageRotation.offsetY} offsetX={stageRotation.offsetX}>
                                 <WindField width={props.stageWidth} height={props.stageHeight} nrows={props.wm.nrows}
                                            ncols={props.wm.ncols} wm={props.wm} showControls={false}
-                                           weatherId={props.weatherId} showCurrent={simulateCurrent}/>
+                                           weatherId={weatherId} showCurrent={simulateCurrent} useSimpleModel={useSimpleModel}/>
                                 <RaceCourse weatherMarkRadiusPix={weatherMarkRadiusPix} milesInPixel={props.milesInPixel}
                                             rc={props.rc} layLine={layLine} markWasRounded={markWasRounded}  layLineCrossed={layLineCrossed}/>
                                 <Boat milesInPixel={props.milesInPixel} bm={props.bm} rc={props.rc}
                                       weatherMarkRadiusPix={weatherMarkRadiusPix} onWeatherMarkReached={onWeatherMarkReached} onLayLineCrossed={onLayLineCrossed} />
+
+                                {/*<IsoChrones milesInPixel={props.milesInPixel} wr={props.wr} ics={props.wr.isochrones} fastestRoute={props.fastestRoute}/>*/}
+                                {finishCount >= SHOW_TARGET_ROUTE_AFTER_FINISH_NO ?
+                                <TargetRoute weatherId={weatherId}  milesInPixel={props.milesInPixel} targetUpwindRoute={targetUpwindRoute} targetDownwindRoute={targetDownwindRoute}/> : null }
+
                             </Layer>
                         </Stage>
                         <Grid xs={5}>
@@ -260,8 +288,10 @@ function Game(props) {
                         </Grid>
                     </Grid>
                     <Grid item xs={3} >
-                        <Box mt={2} pl={2}>
-                            <Link href="https://github.com/sergei/windshiftgame/wiki" target="_blank"  rel="noopener">Help</Link>
+                        <Box  px={2}>
+                            <Paper elevation={1} >
+                                <TargetStats  weatherId={weatherId} wr={props.wr} onTargetRouteComputed={onTargetRouteComputed} />
+                            </Paper>
                         </Box>
                         <Box  mt={2} px={2}>
                             <Paper elevation={1} >
@@ -288,9 +318,8 @@ function Game(props) {
                                 </Box>
 
                                 <Box mt={2} px={2}>
-                                    <FormGroup>
-                                        <FormControlLabel control={<Checkbox checked={simulateCurrent} onChange={handleChangeSimulateCurrent}/>} label="Simulate Current" />
-                                    </FormGroup>
+                                        <FormControlLabel control={<Checkbox checked={simulateCurrent} onChange={handleChangeSimulateCurrent}/>} label="Current" />
+                                        <FormControlLabel control={<Checkbox checked={useSimpleModel} onChange={handleUseSimpleModel}/>} label="Simple model" />
                                 </Box>
 
                                 <Box mt={2} px={2}>
@@ -312,6 +341,9 @@ function Game(props) {
                                     </FormControl>
                                 </Box>
                             </Paper>
+                        </Box>
+                        <Box mt={2} pl={2}>
+                            <Link href="https://github.com/sergei/windshiftgame/wiki" target="_blank"  rel="noopener">Help</Link>
                         </Box>
                     </Grid>
                 </Grid>
