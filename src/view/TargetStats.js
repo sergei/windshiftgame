@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import * as React from "react";
 import {toHHMMSS} from "../utils/Utils";
-import {Box, Typography} from "@mui/material";
+import {Box, Tooltip, Typography} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 
 
@@ -55,11 +55,13 @@ function TargetStats(props) {
     if ( props.wr.isRoutingComplete() ){
         return (
             <Box>
-                    <Grid container spacing={0} disableEqualOverflow>
+                <Grid container spacing={0} disableEqualOverflow>
                         <Grid xs={12}>
-                            <Typography  variant="h6" gutterBottom>
-                                Boat To Beat stats
-                            </Typography>
+                            <Tooltip title="The stats of the boat sailed by computer. You would see its track once you finish">
+                                <Typography  variant="h6" gutterBottom>
+                                    Boat To Beat stats
+                                </Typography>
+                            </Tooltip>
                         </Grid>
                         <Grid xs={12}>
                             <Typography variant="caption" display="block">

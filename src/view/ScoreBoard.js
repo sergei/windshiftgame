@@ -1,6 +1,6 @@
 import React from "react";
 
-import {List, ListItem, ListItemButton, ListItemText, SvgIcon} from "@mui/material";
+import {List, ListItem, ListItemButton, ListItemText, SvgIcon, Tooltip} from "@mui/material";
 import {toHHMMSS} from "../utils/Utils";
 import Checkbox from "@mui/material/Checkbox";
 
@@ -37,12 +37,14 @@ function ScoreBoard(props) {
             <ListItem
                 key={value}
                 secondaryAction={
+                    <Tooltip title="If checked this boat will sail with you">
                     <Checkbox
                         edge="end"
                         onChange={handleToggle(value)}
                         checked={checked.indexOf(value) !== -1}
                         inputProps={{ 'aria-labelledby': labelId }}
                     />
+                    </Tooltip>
                 }
                 disablePadding
             >

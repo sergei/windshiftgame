@@ -18,7 +18,7 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    Select
+    Select, Tooltip
 } from "@mui/material";
 import RaceCourse from "./RaceCourse";
 import BoatStats from "./BoatStats";
@@ -240,6 +240,10 @@ function Game(props) {
         :{rotation:180, offsetX:props.stageWidth, offsetY:props.stageHeight}
 
     // noinspection JSValidateTypes
+    const simpleModelHint = simulateCurrent ?
+           "If checked the wind in all cells has the same speed and current has the same direction"
+          : "If checked the wind in all cells has the same speed";
+
     return (
         <Box mt={2} pl={2}>
                 <Grid container spacing={2} disableEqualOverflow>
@@ -318,8 +322,12 @@ function Game(props) {
                                 </Box>
 
                                 <Box mt={2} px={2}>
+                                    <Tooltip title="If checked the current will be simulated">
                                         <FormControlLabel control={<Checkbox checked={simulateCurrent} onChange={handleChangeSimulateCurrent}/>} label="Current" />
+                                    </Tooltip>
+                                    <Tooltip title={simpleModelHint}>
                                         <FormControlLabel control={<Checkbox checked={useSimpleModel} onChange={handleUseSimpleModel}/>} label="Simple model" />
+                                    </Tooltip>
                                 </Box>
 
                                 <Box mt={2} px={2}>
