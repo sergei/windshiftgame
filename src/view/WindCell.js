@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Group, Rect, Text} from "react-konva";
+import {Group, Line, Rect, Text} from "react-konva";
 import VectorControl from "./VectorControl";
 import WindPointer from "./WindPointer";
 import CurrentPointer from "./CurrentPointer";
@@ -83,8 +83,26 @@ function WindCell(props) {
     const currTextX = props.side / 32;
     const currTextY = props.side / 16 * 2 + props.side / 8;
 
+
+    const rungsNum = 6
+    const rungStep = props.side  / rungsNum
+
+    const rungs = []
+    for(let i = -rungsNum; i < rungsNum * 2; i++){
+        let x0 = - props.side
+        let y0 = 0
+        let x1 = props.side
+        let y1 = 0
+        let offsetX = props.side / 2
+        let offsetY = rungStep * i
+        const rotation = props.wm.cells[props.idx].twd;
+        rungs.push(
+            <Line points={[x0, y0, x1, y1]} x={offsetX} y={offsetY} stroke={'lightblue'} rotation={rotation} dash={[5, 15]} />
+        )
+    }
+
     return (
-        <Group x={props.x} y={props.y}>
+        <Group x={props.x} y={props.y}  clipX={0} clipY={0} clipWidth={props.side} clipHeight={props.side}>
 
             <Rect width={props.side} height={props.side} stroke="lightgrey" />
 
@@ -99,6 +117,8 @@ function WindCell(props) {
             {windControl}
 
             {props.showCurrent ?  currentControl : ''}
+
+            {rungs}
 
         </Group>
     );
