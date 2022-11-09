@@ -40,7 +40,7 @@ class WindFieldModel{
             this.cells[i] = {
                 twd: this.randomDirection(0, 30),
                 tws: this.useSimpleModel ? this.DEFAULT_WIND_SPEED : this.randomSpeed(10, 5, 5),
-                cd: this.useSimpleModel ? this.DEFAULT_CURR_DIR: this.randomDirection(0, 180),
+                cd: this.useSimpleModel ? this.randomUpOrDown(): this.randomDirection(0, 180),
                 cs: this.randomSpeed(1, 0, 1),
                 cache: new Map(),
             }
@@ -66,6 +66,13 @@ class WindFieldModel{
         return dir
     }
 
+    randomUpOrDown(){
+        if ( Math.random() > 0.5 )
+            return 180
+        else
+            return 0
+    }
+
     randomSpeed(mean, min, range){
         let speed =  (Math.random() - 0.5) * range*2 + mean
         if ( speed < 0 )
@@ -88,7 +95,7 @@ class WindFieldModel{
 
     getBoatMovement(x, y, isUpWind, isStartBoard, adjustmentAngle) {
         const ci = this.getCellInfo(x, y)
-        const cacheKey = `${adjustmentAngle},${isUpWind},${isStartBoard}`
+        const cacheKey = `${adjustmentAngle},${isUpWind},${isStartBoard}${this.useCurrent}`
 
         if (!ci.cache.has(cacheKey)){
             // console.log(`Cache miss ${cacheKey}`)

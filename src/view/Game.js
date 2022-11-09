@@ -155,6 +155,8 @@ function Game(props) {
             props.bm.setUpDown(false)
             props.bm.onMarkRounded()
             setMarkWasRounded(true)
+            props.bm.startPause(false)
+            setGameState(GAME_STATE_PAUSED)
         }
     }
 

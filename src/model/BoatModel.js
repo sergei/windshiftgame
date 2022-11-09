@@ -35,14 +35,20 @@ class BoatModel {
 
     setTack(isStarBoard) {
         this.isStartBoard = isStarBoard
+        const move = this.windField.getBoatMovement(this.x, this.y, this.isUpWind, this.isStartBoard, this.adjustmentAngle)
+        this.hdg = move.hdg
     }
 
     setUpDown(isUpWind) {
         this.isUpWind = isUpWind
+        const move = this.windField.getBoatMovement(this.x, this.y, this.isUpWind, this.isStartBoard, this.adjustmentAngle)
+        this.hdg = move.hdg
     }
 
     setAdjustmentAngle(adjustmentAngle) {
         this.adjustmentAngle = adjustmentAngle
+        const move = this.windField.getBoatMovement(this.x, this.y, this.isUpWind, this.isStartBoard, this.adjustmentAngle)
+        this.hdg = move.hdg
     }
 
     startPause(isRunning){
@@ -198,41 +204,10 @@ class BoatModel {
     }
 
     computeLayLines() {
-        // Compute starboard windward mark layline
-        const cs = this.windField.getCellInfo(this.raceCourse.wm.x, this.raceCourse.wm.y)
-        let twd = cs.twd
-        if ( twd > 180 )
-            twd = twd - 360
-        const twa = this.polarTable.getTargets(cs.tws, true).twa
 
-        let gamma = twa - twd  // Angle to the vertical axis (negative heading)
-
-        if ( this.windField.useCurrent ) {
-            // For now don't adjust wind angle for current
-
-            // Boat movement due to current
-            const dxc =  - cs.cs * Math.sin(rads(cs.cd))
-            const dyc =  cs.cs * Math.cos(rads(cs.cd))
-            // console.log(`cd=${cs.cd.toFixed(0)} dxc=${dxc.toFixed(3)} dyc=${dyc.toFixed(3)}`)
-
-            // Boat movement due to the wind
-            const bs = this.polarTable.getTargetSpeed(cs.tws, twa)
-            const hdg = twd - twa
-            const dxw = bs * Math.sin(rads(hdg))
-            const dyw = - bs * Math.cos(rads(hdg))
-
-            // console.log(`hdg=${hdg.toFixed(0)} dxw=${dxw.toFixed(3)} dyw=${dyw.toFixed(3)}`)
-
-            // Boat heading adjusted for current
-            const dx = dxw + dxc;
-            const dy = dyw + dyc;
-            const adjHdg = degrees(Math.atan2(dx, -dy ))
-
-            // console.log(`adjHdg=${adjHdg.toFixed(0)} dx=${dx.toFixed(3)} dy=${dy.toFixed(3)}`)
-            gamma = - adjHdg
-        }
-
-        // console.log(`twd=${twd.toFixed(0)} twa=${twa.toFixed(0)} gamma=${gamma.toFixed(0)}`)
+        const move = this.windField.getBoatMovement(this.raceCourse.wm.x, this.raceCourse.wm.y, this.isUpWind, this.isStartBoard, this.adjustmentAngle)
+        const cog = degrees(Math.atan2(move.dx, -move.dy ))
+        const gamma = - cog    // Angle to the vertical axis (negative heading)
 
         const isMarkBetweenCols = this.windField.ncols % 2 === 0
         const a = isMarkBetweenCols ? this.windField.cellSide : this.windField.cellSide / 2  // Distance to the right border
